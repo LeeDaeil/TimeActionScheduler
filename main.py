@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QColor, QBrush
+from PyQt5.QtGui import QFont, QColor, QBrush, QKeySequence
 from PyQt5 import QtCore, QtGui, QtWidgets
 from functools import partial
 import sys
@@ -104,6 +104,8 @@ class BoardUI_Base(QWidget):
         # Signal
         self.main_lay_table.cellChanged.connect(self._call_cellChanged)
         self.main_lay_table.cellClicked.connect(self._call_cellClicked)
+        self.save_sig = QShortcut(QKeySequence('Ctrl+S'), self)
+        self.save_sig.activated.connect(self._save_all)
         # --------------------------------------------------------------------------------------------------------------
         # Table DB
         self.Table_DB = {
@@ -116,6 +118,7 @@ class BoardUI_Base(QWidget):
         self._load_all()
 
     def _save_all(self):
+        print('Save')
         self.Table_DB = {}  # Table DB Clean
 
         for i in range(self.main_lay_table.rowCount()):
@@ -195,7 +198,7 @@ class BoardUI_Base(QWidget):
         menu = QMenu(self)
         remove_row = menu.addAction("Remove Row")
         insert_row = menu.addAction("Insert Row [Insert]")
-        save_db = menu.addAction("Save DB")
+        save_db = menu.addAction("Save DB [Ctrl+S]")
         load_db = menu.addAction("Load DB")
 
         # disable
@@ -214,12 +217,13 @@ class BoardUI_Base(QWidget):
             self._insert_row()
         if action == save_db:
             if self.main_lay_table.rowCount() != 0:
+                print('SAVE')
                 self._save_all()
         if action == load_db:
             self._load_all()
 
-    def keyPressEvent(self, a):
-        if a.key() == Qt.Key_Insert:
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Insert:
             self._insert_row()
         else:
             pass
