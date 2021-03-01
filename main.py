@@ -26,7 +26,7 @@ class BoardText(QTextEdit):
 
     def _call_textChanged(self):
         # QTextEdit은 QDocument의 크기
-        print(self, "This text is changed.", self.parent().parent())
+        # print(self, "This text is changed.", self.parent().parent())
         if self.parent() is not None:
             # 초기 class 선언하면서 실행되는 과정을 방지.
             self.resize_text_box()
@@ -110,6 +110,11 @@ class BoardUI_Base(QWidget):
             # 'Row' : {'Time': str(time), 'Contents': object(html))
         }
 
+        # --------------------------------------------------------------------------------------------------------------
+        self.show()
+        self.main_lay_table.setHorizontalHeaderLabels(['Time', 'Content'])
+        self._load_all()
+
     def _save_all(self):
         self.Table_DB = {}  # Table DB Clean
 
@@ -119,12 +124,12 @@ class BoardUI_Base(QWidget):
 
             self.Table_DB[i] = {'Time': self.main_lay_table.item(i, 0).text(),
                                 'Cont': get_cont_wid.toHtml()}
-            print(f"Line_{i} is saved.")
+            # print(f"Line_{i} is saved.")
         # save file
         json.dump(self.Table_DB, open("DB.ini", 'w'))
 
     def _load_all(self):
-        print('Load all file')
+        # print('Load all file')
         # 이전 파일 모두 지움
         [self.main_lay_table.removeRow(0) for i in range(self.main_lay_table.rowCount())]
 
@@ -144,7 +149,7 @@ class BoardUI_Base(QWidget):
         self.main_lay_table.resizeRowsToContents()
 
     def _resize_main_lay_table(self, ):
-        print("Resize Main lay table according to contents")
+        # print("Resize Main lay table according to contents")
         self.main_lay_table.resizeRowsToContents()
 
     def _save_pos_info(self, win_name):
@@ -185,18 +190,26 @@ class BoardUI_Base(QWidget):
         cell_widget.textChanged.connect(self._resize_main_lay_table)
 
     def contextMenuEvent(self, event):
+        """ Main window 에서 마우스 오른쪽 누르면 나오는 메뉴 """
         gp = event.globalPos()
         menu = QMenu(self)
         remove_row = menu.addAction("Remove Row")
-        insert_row = menu.addAction("Insert Row")
+        insert_row = menu.addAction("Insert Row [Insert]")
         save_db = menu.addAction("Save DB")
         load_db = menu.addAction("Load DB")
+
+        # disable
+        if self.main_lay_table.currentItem() is not None:
+            remove_row.setDisabled(False)  # 셀을 선택한 후 액션을 한 경우
+        else:
+            remove_row.setDisabled(True)
+
         action = menu.exec_(gp)
 
+        # Action connect -----------------------------------------------------------------------------------------------
         if action == remove_row:
-            if self.main_lay_table.currentItem() != None: # 셀을 선택한 후 액션을 한 경우
-                get_row = self.main_lay_table.currentItem().row()   # 선택된 셀의 row 취득
-                self.main_lay_table.removeRow(get_row)              # row 정보에 따라 해당 row 제거
+            get_row = self.main_lay_table.currentItem().row()   # 선택된 셀의 row 취득
+            self.main_lay_table.removeRow(get_row)              # row 정보에 따라 해당 row 제거
         if action == insert_row:
             self._insert_row()
         if action == save_db:
@@ -206,7 +219,10 @@ class BoardUI_Base(QWidget):
             self._load_all()
 
     def keyPressEvent(self, a):
-        pass
+        if a.key() == Qt.Key_Insert:
+            self._insert_row()
+        else:
+            pass
 
     def moveEvent(self, a) -> None:
         self._save_pos_info(win_name=self.WindowId)
@@ -218,6 +234,5 @@ class BoardUI_Base(QWidget):
 if __name__ == '__main__':
     # Board_Tester
     app = QApplication(sys.argv)
-    window = BoardUI_Base(title='MyHis', WindowId='Win')
-    window.show()
+    window = BoardUI_Base(title='TimeActionScheduler', WindowId='Win')
     app.exec_()
