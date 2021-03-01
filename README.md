@@ -3,7 +3,7 @@
 # Main window
 
 <p align="left" width="100%">
-    <img width="33%" src="./Image/MainWin_img.png"> 
+    <img width="33%" src="https://github.com/LeeDaeil/TimeActionScheduler/blob/main/Image/MainWin_img.PNG?raw=true"> 
 </p>
 
 
